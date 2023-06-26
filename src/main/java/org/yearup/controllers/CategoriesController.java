@@ -26,10 +26,11 @@ public class CategoriesController
     public List<Category> getAll()
     {
         // find and return all categories
-        return null;
+        return categoryDao.getAllCategories();
     }
 
     // add the appropriate annotation for a get action
+    @GetMapping
     public Category getById(@PathVariable int id)
     {
         // get the category by id

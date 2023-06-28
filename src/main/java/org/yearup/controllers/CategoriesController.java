@@ -1,5 +1,6 @@
 package org.yearup.controllers;
 
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,11 +41,16 @@ public class CategoriesController
     }
 
     // add the appropriate annotation for a get action
-    @GetMapping()
+    @GetMapping("{id}")
     public Category getById(@PathVariable int id)
     {
+        Category category = categoryDao.getById(id);
+
+        if (category == null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found");
+        }
         // get the category by id
-        return categoryDao.getById(id);
+        return category;
     }
 
     // the url to return all products in category 1 would look like this
@@ -60,6 +66,7 @@ public class CategoriesController
     // add annotation to call this method for a POST action
     // add annotation to ensure that only an ADMIN can call this function
    @PostMapping
+   @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public Category addCategory(@RequestBody Category category)
     {
@@ -84,11 +91,17 @@ public class CategoriesController
 
     // add annotation to call this method for a DELETE action - the url path must include the categoryId
     // add annotation to ensure that only an ADMIN can call this function
-    @PutMapping("{categoryID}")
+    @DeleteMapping("{categoryId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void deleteCategory(@PathVariable int id)
-    {
-        categoryDao.delete(id);
-        // delete the category by id
+    public void deleteCategory(@PathVariable int categoryId) {
+        Category category = categoryDao.getById(categoryId);
+        if (category != null){
+            categoryDao.delete(categoryId);
+            categoryDao.delete(categoryId);
+            // delete the category by id
+        }else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found");
+        }
     }
 }
